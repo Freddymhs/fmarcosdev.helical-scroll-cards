@@ -1,0 +1,45 @@
+{
+  "name": "@fmarcosdev/helical-scroll-cards",
+  "version": "1.0.0",
+  "description": "3D helix scroll component for React with Three.js. Virtualized, paginated, touch-ready, SSR-safe.",
+  "author": "fmarcosdev",
+  "license": "MIT",
+  "keywords": ["react", "three.js", "3d", "helix", "scroll", "cards", "virtualized", "webgl"],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/fmarcosdev/helical-scroll-cards"
+  },
+  "type": "module",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js",
+      "require": "./dist/index.cjs"
+    }
+  },
+  "files": ["dist"],
+  "scripts": {
+    "build": "tsup",
+    "build:watch": "tsup --watch",
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm run typecheck && npm run build"
+  },
+  "peerDependencies": {
+    "react": ">=18.0.0",
+    "react-dom": ">=18.0.0",
+    "three": ">=0.150.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@types/three": "^0.177.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "three": "^0.177.0",
+    "tsup": "^8.0.0",
+    "typescript": "~5.7.0"
+  }
+}
