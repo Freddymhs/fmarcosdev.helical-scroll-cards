@@ -1,10 +1,19 @@
 {
   "name": "@fmarcosdev/helical-scroll-cards",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "3D helix scroll component for React with Three.js. Virtualized, paginated, touch-ready, SSR-safe.",
   "author": "fmarcosdev",
   "license": "MIT",
-  "keywords": ["react", "three.js", "3d", "helix", "scroll", "cards", "virtualized", "webgl"],
+  "keywords": [
+    "react",
+    "three.js",
+    "3d",
+    "helix",
+    "scroll",
+    "cards",
+    "virtualized",
+    "webgl"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/fmarcosdev/helical-scroll-cards"
@@ -20,7 +29,9 @@
       "require": "./dist/index.cjs"
     }
   },
-  "files": ["dist"],
+  "files": [
+    "dist"
+  ],
   "scripts": {
     "build": "tsup",
     "build:watch": "tsup --watch",
