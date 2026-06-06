@@ -200,6 +200,21 @@ const HelicalScrollCards = <T extends CardItem = CardItem>({
     loadingMoreRef.current = loadingMore;
     onLoadMoreRef.current = onLoadMore;
     themeRef.current = theme;
+    configRef.current = {
+      ...configRef.current,
+      turns: helixConfig.turns,
+      segments: helixConfig.segments,
+      helixHeight: helixConfig.helixHeight,
+      cardCount: helixConfig.slotCount,
+      cardScale: helixConfig.cardScale,
+      scrollSensitivity: scrollSpeed,
+      yOffset: helixConfig.yOffset,
+      cameraFov: helixConfig.cameraFov,
+      cardCanvasWidth: helixConfig.cardCanvasWidth,
+      cardCanvasHeight: helixConfig.cardCanvasHeight,
+      titleMaxLength: helixConfig.titleMaxLength,
+      topMarginSlots: helixConfig.topMarginSlots,
+    };
 
     const { cardCount, segments } = configRef.current;
     const maxScroll = Math.max(
@@ -282,7 +297,11 @@ const HelicalScrollCards = <T extends CardItem = CardItem>({
         width: canvasW,
         height: canvasH,
       });
-      const ctx = canvas.getContext("2d")!;
+      const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        console.warn("Canvas 2D context not available");
+        return new THREE.CanvasTexture(canvas);
+      }
 
       // 🎯 Proporciones relativas al tamaño del canvas
       const centerX = canvasW / 2;
