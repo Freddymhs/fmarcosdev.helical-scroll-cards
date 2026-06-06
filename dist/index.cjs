@@ -78,7 +78,8 @@ var HelicalScrollCards = ({
   renderCardDate,
   loadingText = "Loading more...",
   emptyText = "No items to display",
-  className = ""
+  className = "",
+  autoScroll = false
 }) => {
   const [isClient, setIsClient] = react.useState(false);
   react.useEffect(() => {
@@ -115,6 +116,9 @@ var HelicalScrollCards = ({
   );
   const fadeAnimationsRef = react.useRef(/* @__PURE__ */ new Set());
   const isMountedRef = react.useRef(true);
+  const autoScrollRef = react.useRef(autoScroll);
+  const isUserScrollingRef = react.useRef(false);
+  const userScrollTimeoutRef = react.useRef(void 0);
   const lastLoadMoreCallRef = react.useRef(0);
   const maxScrollRef = react.useRef(0);
   const itemsRef = react.useRef(items);
@@ -143,6 +147,22 @@ var HelicalScrollCards = ({
     loadingMoreRef.current = loadingMore;
     onLoadMoreRef.current = onLoadMore;
     themeRef.current = theme;
+    autoScrollRef.current = autoScroll;
+    configRef.current = {
+      ...configRef.current,
+      turns: helixConfig.turns,
+      segments: helixConfig.segments,
+      helixHeight: helixConfig.helixHeight,
+      cardCount: helixConfig.slotCount,
+      cardScale: helixConfig.cardScale,
+      scrollSensitivity: scrollSpeed,
+      yOffset: helixConfig.yOffset,
+      cameraFov: helixConfig.cameraFov,
+      cardCanvasWidth: helixConfig.cardCanvasWidth,
+      cardCanvasHeight: helixConfig.cardCanvasHeight,
+      titleMaxLength: helixConfig.titleMaxLength,
+      topMarginSlots: helixConfig.topMarginSlots
+    };
     const { cardCount, segments } = configRef.current;
     const maxScroll = Math.max(
       0,
@@ -207,6 +227,10 @@ var HelicalScrollCards = ({
         height: canvasH
       });
       const ctx = canvas.getContext("2d");
+      if (!ctx) {
+        console.warn("Canvas 2D context not available");
+        return new THREE__namespace.CanvasTexture(canvas);
+      }
       const centerX = canvasW / 2;
       const titleStartY = canvasH * 0.18;
       const dateY = canvasH * 0.688;
@@ -414,8 +438,16 @@ var HelicalScrollCards = ({
         Math.min(newTarget, maxScrollRef.current)
       );
     };
+    const pauseAutoScroll = () => {
+      isUserScrollingRef.current = true;
+      if (userScrollTimeoutRef.current) clearTimeout(userScrollTimeoutRef.current);
+      userScrollTimeoutRef.current = setTimeout(() => {
+        isUserScrollingRef.current = false;
+      }, 1500);
+    };
     const handleWheel = (e) => {
       e.preventDefault();
+      pauseAutoScroll();
       handleScroll(e.deltaY > 0 ? 1 : -1);
     };
     let touchStartY = 0;
@@ -430,6 +462,7 @@ var HelicalScrollCards = ({
       const deltaY = lastTouchY - currentY;
       lastTouchY = currentY;
       if (Math.abs(deltaY) > 2) {
+        pauseAutoScroll();
         handleScroll(deltaY > 0 ? 0.3 : -0.3);
       }
     };
@@ -465,6 +498,12 @@ var HelicalScrollCards = ({
     const animate = () => {
       if (!isMountedRef.current) return;
       animationFrameIdRef.current = requestAnimationFrame(animate);
+      if (autoScrollRef.current && !isUserScrollingRef.current) {
+        targetScrollRef.current = Math.min(
+          targetScrollRef.current + 0.03,
+          maxScrollRef.current
+        );
+      }
       scrollOffsetRef.current += (targetScrollRef.current - scrollOffsetRef.current) * 0.12;
       const currentItems = itemsRef.current;
       const { cardCount: cardCount2, segments: segments2 } = configRef.current;
@@ -564,6 +603,7 @@ var HelicalScrollCards = ({
     return () => {
       isMountedRef.current = false;
       fadeAnimationsRef.current.clear();
+      if (userScrollTimeoutRef.current) clearTimeout(userScrollTimeoutRef.current);
       window.removeEventListener("resize", handleResize);
       element?.removeEventListener("wheel", handleWheel);
       element?.removeEventListener("touchstart", handleTouchStart);

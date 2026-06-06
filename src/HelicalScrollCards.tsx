@@ -104,6 +104,7 @@ export interface HelicalScrollCardsProps<T extends CardItem = CardItem> {
   loadingText?: string;
   emptyText?: string;
   className?: string;
+  autoScroll?: boolean;
 }
 
 const HelicalScrollCards = <T extends CardItem = CardItem>({
@@ -123,6 +124,7 @@ const HelicalScrollCards = <T extends CardItem = CardItem>({
   loadingText = "Loading more...",
   emptyText = "No items to display",
   className = "",
+  autoScroll = false,
 }: HelicalScrollCardsProps<T>) => {
   // 🎯 SSR Guard
   const [isClient, setIsClient] = useState(false);
@@ -166,6 +168,9 @@ const HelicalScrollCards = <T extends CardItem = CardItem>({
   );
   const fadeAnimationsRef = useRef<Set<number>>(new Set()); // Track fade animations
   const isMountedRef = useRef(true);
+  const autoScrollRef = useRef(autoScroll);
+  const isUserScrollingRef = useRef(false);
+  const userScrollTimeoutRef = useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
 
   const lastLoadMoreCallRef = useRef(0);
   const maxScrollRef = useRef(0);
@@ -200,6 +205,7 @@ const HelicalScrollCards = <T extends CardItem = CardItem>({
     loadingMoreRef.current = loadingMore;
     onLoadMoreRef.current = onLoadMore;
     themeRef.current = theme;
+    autoScrollRef.current = autoScroll;
     configRef.current = {
       ...configRef.current,
       turns: helixConfig.turns,
@@ -587,8 +593,17 @@ const HelicalScrollCards = <T extends CardItem = CardItem>({
       );
     };
 
+    const pauseAutoScroll = () => {
+      isUserScrollingRef.current = true;
+      if (userScrollTimeoutRef.current) clearTimeout(userScrollTimeoutRef.current);
+      userScrollTimeoutRef.current = setTimeout(() => {
+        isUserScrollingRef.current = false;
+      }, 1500);
+    };
+
     const handleWheel = (e: WheelEvent) => {
       e.preventDefault();
+      pauseAutoScroll();
       handleScroll(e.deltaY > 0 ? 1 : -1);
     };
 
@@ -608,6 +623,7 @@ const HelicalScrollCards = <T extends CardItem = CardItem>({
       lastTouchY = currentY;
 
       if (Math.abs(deltaY) > 2) {
+        pauseAutoScroll();
         handleScroll(deltaY > 0 ? 0.3 : -0.3);
       }
     };
@@ -657,6 +673,13 @@ const HelicalScrollCards = <T extends CardItem = CardItem>({
     const animate = () => {
       if (!isMountedRef.current) return;
       animationFrameIdRef.current = requestAnimationFrame(animate);
+
+      if (autoScrollRef.current && !isUserScrollingRef.current) {
+        targetScrollRef.current = Math.min(
+          targetScrollRef.current + 0.03,
+          maxScrollRef.current
+        );
+      }
 
       // Faster interpolation = smoother response
       scrollOffsetRef.current +=
@@ -810,6 +833,7 @@ const HelicalScrollCards = <T extends CardItem = CardItem>({
     return () => {
       isMountedRef.current = false;
       fadeAnimationsRef.current.clear();
+      if (userScrollTimeoutRef.current) clearTimeout(userScrollTimeoutRef.current);
       window.removeEventListener("resize", handleResize);
       element?.removeEventListener("wheel", handleWheel);
       element?.removeEventListener("touchstart", handleTouchStart);

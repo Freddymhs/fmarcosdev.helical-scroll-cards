@@ -59,7 +59,8 @@ interface HelicalScrollCardsProps<T extends CardItem = CardItem> {
     loadingText?: string;
     emptyText?: string;
     className?: string;
+    autoScroll?: boolean;
 }
-declare const HelicalScrollCards: <T extends CardItem = CardItem>({ items, config, debug, hiddenReposition, clockwise, scrollSpeed, onLoadMore, hasMore, loadingMore, theme: customTheme, renderCardLabel, renderCardTitle, renderCardDate, loadingText, emptyText, className, }: HelicalScrollCardsProps<T>) => react_jsx_runtime.JSX.Element;
+declare const HelicalScrollCards: <T extends CardItem = CardItem>({ items, config, debug, hiddenReposition, clockwise, scrollSpeed, onLoadMore, hasMore, loadingMore, theme: customTheme, renderCardLabel, renderCardTitle, renderCardDate, loadingText, emptyText, className, autoScroll, }: HelicalScrollCardsProps<T>) => react_jsx_runtime.JSX.Element;
 
 export { type CardConfig, type CardItem, HelicalScrollCards, type HelicalScrollCardsProps, type HelixConfig, type HelixTheme };
